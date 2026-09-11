@@ -18,15 +18,12 @@
     <RepositoryUrl>https://github.com/gerbendv/PdfXmpReader</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>pdf;xmp;metadata;qpdf</PackageTags>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="PdfXmpReader.cs" />
     <Compile Include="QpdfNativeApi.cs" />
     <Compile Include="QpdfMetadataReader.cs" />
     <PackageReference Include="System.Text.Json" Version="8.0.6" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <None Include="LICENSE.qpdf.txt" Pack="true" PackagePath="licenses/qpdf/LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
     <None Include="NOTICE.qpdf.txt" Pack="true" PackagePath="licenses/qpdf" CopyToOutputDirectory="PreserveNewest" />
     <None Include="runtimes/linux-x64/native/*"
