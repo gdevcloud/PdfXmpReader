@@ -14,6 +14,30 @@ The package includes the qpdf native runtime files for Windows x64 (`win-x64`),
 glibc Linux x64 (`linux-x64`), and Alpine Linux x64 (`linux-musl-x64`).
 ARM64 native binaries are not included.
 
+### Debian Linux containers
+
+Version 1.0.3 builds the glibc native library on Debian 12 (glibc 2.36).
+Restore and publish with `linux-x64` for Debian-based images, including Azure
+Functions .NET 8 isolated images. No system qpdf installation or custom
+`DllImport` resolver is required. The package bundles libjpeg; glibc, zlib,
+and the GCC runtime are supplied by the .NET images.
+
+Versions 1.0.1 and 1.0.2 bundled Ubuntu libraries requiring glibc 2.38 and
+cannot load in Debian 12 without a native-library workaround.
+
+To rebuild with qpdf 12.4.2 checked out in a sibling `qpdf` directory, run
+from the PdfXmpReader directory (PowerShell):
+
+```powershell
+docker run --rm --platform linux/amd64 `
+    --mount "type=bind,source=$((Resolve-Path ../qpdf).Path),target=/src/qpdf,readonly" `
+    --mount "type=bind,source=$((Get-Location).Path),target=/package" `
+    mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim sh /package/build-linux.sh
+```
+
+The script replaces the old Ubuntu dependency closure with `libqpdf.so` and
+`libjpeg.so.62`, and uses qpdf's native crypto provider.
+
 ### Alpine Linux containers
 
 Use the Alpine runtime identifier for both restore and publish:
@@ -81,5 +105,5 @@ The result is the raw XMP XML packet, or `null` when the PDF does not contain XM
 
 PdfXmpReader is available under the MIT license. The package also includes qpdf and its associated license and notice files. See [LICENSE](LICENSE), [LICENSE.qpdf.txt](LICENSE.qpdf.txt), and [NOTICE.qpdf.txt](NOTICE.qpdf.txt).
 
-The Alpine native library incorporates libjpeg-turbo. This software is based in
+The Linux native libraries incorporate libjpeg-turbo. This software is based in
 part on the work of the Independent JPEG Group.
