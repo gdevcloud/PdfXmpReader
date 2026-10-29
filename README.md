@@ -2,6 +2,8 @@
 
 Read XMP metadata from PDF files in .NET applications using the native qpdf library.
 
+Source code and issues: [gdevcloud/PdfXmpReader](https://github.com/gdevcloud/PdfXmpReader).
+
 ## Installation
 
 ```bash
