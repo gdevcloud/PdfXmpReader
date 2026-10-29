@@ -14,8 +14,8 @@
     <Authors>Gerben de Vries</Authors>
     <Description>Reads XMP metadata from PDF files using qpdf.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/gerbendv/PdfXmpReader</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/gerbendv/PdfXmpReader</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/gdevcloud/PdfXmpReader</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/gdevcloud/PdfXmpReader</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>pdf;xmp;metadata;qpdf</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -31,6 +31,11 @@
     <None Include="runtimes/linux-x64/native/*"
           Pack="true"
           PackagePath="runtimes/linux-x64/native/"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest" />
+        <None Include="runtimes/linux-musl-x64/native/*"
+          Pack="true"
+          PackagePath="runtimes/linux-musl-x64/native/"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest" />
     <None Include="runtimes/win-x64/native/*"

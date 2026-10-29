@@ -27,3 +27,17 @@ jobs:
 
       - name: Test
         run: dotnet test PdfXmpReader.Tests/PdfXmpReader.Tests.csproj --configuration Release --no-restore
+
+  alpine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test on Alpine Linux
+        run: >-
+          docker run --rm --platform linux/amd64
+          --volume "$PWD:/src" --workdir /src
+          mcr.microsoft.com/dotnet/sdk:8.0-alpine3.22
+          dotnet test PdfXmpReader.Tests/PdfXmpReader.Tests.csproj
+          --configuration Release --runtime linux-musl-x64
+          -p:TargetFrameworks=net8.0
