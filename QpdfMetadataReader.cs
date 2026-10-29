@@ -1,11 +1,10 @@
-using System.Text;
 using System.Text.Json;
 
 namespace PdfXmpReader;
 
 internal static class QpdfMetadataReader
 {
-    public static string? Read(string inputFile)
+    public static byte[]? ReadBytes(string inputFile)
     {
         var outputFile = Path.Combine(Path.GetTempPath(), $"pdf-xmp-reader-{Guid.NewGuid():N}.json");
         try
@@ -39,7 +38,7 @@ internal static class QpdfMetadataReader
                 return null;
             }
 
-            return Encoding.UTF8.GetString(data.GetBytesFromBase64());
+            return data.GetBytesFromBase64();
         }
         finally
         {

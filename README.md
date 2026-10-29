@@ -93,7 +93,30 @@ using var stream = File.OpenRead("document.pdf");
 var xmp = PdfXmpReader.ReadXmp(stream);
 ```
 
-The result is the raw XMP XML packet, or `null` when the PDF does not contain XMP metadata. The input stream remains open after the call.
+The result is the decoded XMP XML packet, or `null` when the PDF does not contain
+XMP metadata. XML encoding detection honors the byte order mark and encoding
+declaration, including UTF-8, UTF-16LE and UTF-16BE. A byte order mark is not
+included in the returned string. The input stream remains open after the call.
+
+For XML parsers that accept bytes, use `ReadXmpBytes` to preserve the original
+encoding, declaration and byte order mark without a string conversion:
+
+```csharp
+using var stream = File.OpenRead("document.pdf");
+var xmpBytes = PdfXmpReader.ReadXmpBytes(stream);
+if (xmpBytes is not null)
+{
+    using var metadataStream = new MemoryStream(xmpBytes);
+    using var reader = System.Xml.XmlReader.Create(metadataStream);
+    var metadata = System.Xml.Linq.XDocument.Load(reader);
+}
+```
+
+Both `ReadXmpBytes` and `ReadXmp` accept a file path or a readable stream and
+return `null` when metadata is absent. Do not re-encode the string result as
+UTF-8 while retaining a declaration for a different encoding; use the byte API
+instead. Version 1.0.4 fixes the unconditional UTF-8 decoding in earlier versions;
+the bundled native qpdf libraries are unchanged.
 
 ## Target frameworks
 
