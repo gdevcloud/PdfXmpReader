@@ -9,6 +9,11 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        native-order: [reader-first, quest-first]
+    env:
+      PDFXMPREADER_NATIVE_ORDER: ${{ matrix.native-order }}
     steps:
       - uses: actions/checkout@v4
 
@@ -20,7 +25,7 @@ jobs:
             10.0.x
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore PdfXmpReader.Tests/PdfXmpReader.Tests.csproj
 
       - name: Build
         run: dotnet build --configuration Release --no-restore
@@ -30,12 +35,16 @@ jobs:
 
   debian:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        native-order: [reader-first, quest-first]
     steps:
       - uses: actions/checkout@v4
 
       - name: Test on Debian 12
         run: >-
           docker run --rm --platform linux/amd64
+          --env PDFXMPREADER_NATIVE_ORDER=${{ matrix.native-order }}
           --volume "$PWD:/src" --workdir /src
           mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim
           dotnet test PdfXmpReader.Tests/PdfXmpReader.Tests.csproj
@@ -44,12 +53,16 @@ jobs:
 
   alpine:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        native-order: [reader-first, quest-first]
     steps:
       - uses: actions/checkout@v4
 
       - name: Test on Alpine Linux
         run: >-
           docker run --rm --platform linux/amd64
+          --env PDFXMPREADER_NATIVE_ORDER=${{ matrix.native-order }}
           --volume "$PWD:/src" --workdir /src
           mcr.microsoft.com/dotnet/sdk:8.0-alpine3.22
           dotnet test PdfXmpReader.Tests/PdfXmpReader.Tests.csproj

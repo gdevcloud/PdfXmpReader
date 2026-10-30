@@ -2,11 +2,62 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using NUnit.Framework;
+using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
 
 namespace PdfXmpReader.Tests;
 
 public sealed class PdfXmpReaderTests
 {
+    [Test, Order(-1)]
+    public void NativeLibrariesCoexistWithQuestPdf()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"pdf-xmp-coexist-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        try
+        {
+            var input = Path.Combine(directory, "input.pdf");
+            var merged = Path.Combine(directory, "merged.pdf");
+            const string xmp = "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\"/>";
+            var metadataPdf = BuildPdfWithMetadata(Encoding.UTF8.GetBytes(xmp));
+
+            void ReadMetadata() =>
+                Assert.That(PdfXmpReader.ReadXmp(new MemoryStream(metadataPdf)), Is.EqualTo(xmp));
+
+            void MergeWithQuestPdf()
+            {
+                QuestPDF.Settings.License = LicenseType.Community;
+                Document.Create(container =>
+                    container.Page(page => page.Content().Text("Native library coexistence")))
+                    .WithMetadata(new DocumentMetadata { Title = "Native coexistence" })
+                    .WithSettings(new DocumentSettings { PDFA_Conformance = PDFA_Conformance.PDFA_3B })
+                    .GeneratePdf(input);
+                DocumentOperation.LoadFile(input, null)
+                    .MergeFile(input, null)
+                    .Save(merged);
+                Assert.That(new FileInfo(merged).Length, Is.GreaterThan(100));
+            }
+
+            if (Environment.GetEnvironmentVariable("PDFXMPREADER_NATIVE_ORDER") == "quest-first")
+            {
+                MergeWithQuestPdf();
+                ReadMetadata();
+            }
+            else
+            {
+                ReadMetadata();
+                MergeWithQuestPdf();
+            }
+
+            Assert.That(PdfXmpReader.ReadXmp(merged), Does.Contain("Native coexistence"));
+            ReadMetadata();
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
     [Test]
     public void ReadsUncompressedXmpFromTraditionalPdf()
     {

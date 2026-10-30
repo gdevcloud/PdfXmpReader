@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="NUnit" Version="4.6.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="6.2.0" />
+    <PackageReference Include="QuestPDF" Version="2026.8.0" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\runtimes\linux-x64\native\*" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Condition="'$(RuntimeIdentifier)' != 'linux-musl-x64'" />

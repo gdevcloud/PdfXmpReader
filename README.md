@@ -14,6 +14,12 @@ The package includes the qpdf native runtime files for Windows x64 (`win-x64`),
 glibc Linux x64 (`linux-x64`), and Alpine Linux x64 (`linux-musl-x64`).
 ARM64 native binaries are not included.
 
+Starting with 1.0.5, the reader imports `pdfxmpreader_qpdf` and bundles
+`pdfxmpreader_qpdf.dll` / `libpdfxmpreader_qpdf.so` instead of `qpdf.dll` /
+`libqpdf.so`. The Linux SONAME is private as well. This prevents output-file and
+loader collisions with other QPDF consumers, including QuestPDF's patched QPDF.
+QuestPDF is a test-only dependency, not a dependency of the reader package.
+
 ### Debian Linux containers
 
 Version 1.0.3 builds the glibc native library on Debian 12 (glibc 2.36).
@@ -35,7 +41,7 @@ docker run --rm --platform linux/amd64 `
     mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim sh /package/build-linux.sh
 ```
 
-The script replaces the old Ubuntu dependency closure with `libqpdf.so` and
+The script replaces the old Ubuntu dependency closure with `libpdfxmpreader_qpdf.so` and
 `libjpeg.so.62`, and uses qpdf's native crypto provider.
 
 ### Alpine Linux containers
@@ -67,8 +73,33 @@ docker run --rm --platform linux/amd64 `
     mcr.microsoft.com/dotnet/sdk:8.0-alpine3.22 sh /package/build-linux-musl.sh
 ```
 
-The script writes `libqpdf.so` and `libjpeg.so.8` into
+The script writes `libpdfxmpreader_qpdf.so` and `libjpeg.so.8` into
 `runtimes/linux-musl-x64/native/`, and uses qpdf's native crypto provider.
+
+### Rebuilding the Windows native library
+
+Use an x64 Visual Studio developer shell with CMake 3.19+ and Ninja available.
+Prepare qpdf's `vcpkg/installed/x64-windows-static` dependencies as described in
+qpdf's Windows build instructions, then run from the reader directory:
+
+```powershell
+cmake -S ..\qpdf -B artifacts\native-win -G Ninja `
+    -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF `
+    -DUSE_IMPLICIT_CRYPTO=OFF -DREQUIRE_CRYPTO_NATIVE=ON `
+    "-DCMAKE_PROJECT_qpdf_INCLUDE=$((Get-Location).Path)\qpdf-native-name.cmake"
+cmake --build artifacts\native-win --target libqpdf --parallel 2
+Copy-Item artifacts\native-win\libqpdf\pdfxmpreader_qpdf.dll runtimes\win-x64\native\
+```
+
+The shared CMake hook changes the output name without modifying qpdf sources.
+Keep the bundled Visual C++ runtime DLLs alongside the Windows library.
+
+### Native coexistence regression
+
+CI runs the reader suite alongside QuestPDF 2026.8.0 on all three platforms,
+in fresh test processes with `PDFXMPREADER_NATIVE_ORDER` set to `reader-first`
+and `quest-first`. It verifies reading XMP, rendering, merging with QuestPDF's
+patched QPDF, and reading the merged PDF in the same process.
 
 ## Usage
 

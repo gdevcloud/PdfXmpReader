@@ -5,7 +5,7 @@ namespace PdfXmpReader;
 
 internal static class QpdfNativeApi
 {
-    private const string LibraryName = "qpdf";
+    private const string LibraryName = "pdfxmpreader_qpdf";
     private const int CustomLogger = 4;
 
     public static void ExecuteJob(string json)
